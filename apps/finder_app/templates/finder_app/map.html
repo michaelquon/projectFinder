@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"> {% load static %}
+    <link rel="stylesheet" href="{% static 'finder_app/css/map_style.css' %}">
+    <!-- jquery -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <title>MainMap</title>
+</head>
+
+<body>
+    <div id='map'></div>
+    <div class='activity image10' id='userPhotoDiv'>
+        <img class="image" src="{{ user.photo.url }}">
+    </div>
+    <div class="activity image100" id='userProfileDiv'>
+        <img class="image" src="{{ user.photo.url }}">
+        <h2>{{ user.username }}</h2>
+        <h4>{{ user.first_name }} &nbsp; {{  user.last_name }}</h4>
+        <p>{{ user.dob }}</p>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class='activity' id="startSearchDiv">
+		<u>Look for event where you are</u>
+	</div>
+	<div class='activity' id="searchDiv">
+		<form action="/activity/search" method="post" id="searchForm">
+			{% csrf_token %}
+			<input type="hidden" name="Lat" id="Lat">
+			<input type="hidden" name="Lng" id="Lng">
+			Activity you are interested in:
+			<select name="categoryId">
+				{% for category in categories %}
+					<option value="{{ category.id }}">{{ category.name }}</option>
+				{% endfor %}
+			</select>
+			<input type="submit" value="Search">
+		</form>
+	</div>
+	<div class="activity" id="restart">
+		<u>Search again</u>
+	</div>
+	<div class='activity' id='beginCreationDiv'>
+		<u>Let people know what you are doing</u>
+	</div>
+	<div class='activity' id='actFormDiv'>
+	<form action="/activity/register" method="post" id="activityForm">
+		{% csrf_token %}
+		<table>
+			<tr>
+				<td>Choose category of activity:</td>
+				<td>
+					<select name="categoryId">
+						{% for category in categories %}
+							<option value="{{ category.id }}">{{ category.name }}</option>
+						{% endfor %}
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>Or add a new Category:</td>
+				<td><input type="text" name="newCategory"></td>
+			</tr>
+			<tr>
+				<td>Description of Event:</td>
+				<td><textarea name="desc"></textarea></td>
+            </tr>
+            <tr>
+                <td>How many people can come:</td>
+                <td><input type="text" name="max_users"></td>
+            </tr>
+            <tr>
+                <td>Duration of Event(in Hours):</td>
+                <td><input type="number" name="duration"></td>
+            </tr>
+            <tr>
+                <td>What to look for:</td>
+                <td><input type="text" name="where"></td>
+            </tr>
+			<tr>
+				<td></td>
+				<td><input type="submit" id="submitButton" value="Post Activity"></td>
+			</tr>
+		</table>
+		<input type="hidden" name="actLat" id="actLat">
+		<input type="hidden" name="actLng" id="actLng">
+		<input type="hidden" name="activeUser" value="{{ user.id }}">		
+	</form>
+	{% if messages %}
+		I got here
+		<ul class="messages">
+			{% for message in messages %}
+				<li class="{{ message.tags }}">{{ message }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	</div>
+
+
+
+
+
+
+
+
+    <script>
+        function getUserLocation(){
+				navigator.geolocation.getCurrentPosition(showUserPosition);
+				}
+				function showUserPosition(position){
+					var lat = position.coords.latitude;
+					document.getElementById("Lat").value = lat;
+					var lng = position.coords.longitude;
+					document.getElementById("Lng").value = lng;
+				}
+		function getActivityLocation(){
+				navigator.geolocation.getCurrentPosition(showActPosition);
+				}
+				function showActPosition(position){
+					var lat = position.coords.latitude;
+					document.getElementById("actLat").value = lat;
+					var lng = position.coords.longitude;
+					document.getElementById("actLng").value = lng;
+				}
+		$(document).ready(function(){
+			$('#beginCreationDiv').click(function(){
+				$('#beginCreationDiv').slideToggle();
+				$('#actFormDiv').slideToggle(function(){
+					if ($(this).is(':visible'))
+        			$(this).css('display','inline-block');
+				});
+				if ($('#searchDiv').is(':visible')){
+        			$('#startSearchDiv').slideToggle();
+        			$('#searchDiv').slideToggle();}
+        		getActivityLocation();	
+			});
+            $('#userPhotoDiv').click(function(){
+                $('#userPhotoDiv').slideToggle();
+                $('#userProfileDiv').slideToggle();
+            });
+            $('#userProfileDiv').click(function(){
+                $('#userPhotoDiv').slideToggle();
+                $('#userProfileDiv').slideToggle();
+            });
+			$('#activityForm').submit(function(e){
+				e.preventDefault()
+				$('#beginCreationDiv').slideToggle();
+				$('#actFormDiv').slideToggle();
+				$.ajax({
+					url: $(this).attr('action'),
+					method: 'post',
+					data: $(this).serialize(),
+					success: function(serverResponse){
+					}
+				})
+				document.getElementById("actLat").value = 0;
+				document.getElementById("actLng").value = 0;
+			});
+			$('#startSearchDiv').click(function(){
+				$('#startSearchDiv').slideToggle();
+				$('#searchDiv').slideToggle(function(){
+					if ($(this).is(':visible'))
+        			$(this).css('display','inline-block');
+        		});
+        		if ($('#actFormDiv').is(':visible')){
+        			$('#beginCreationDiv').slideToggle();
+        			$('#actFormDiv').slideToggle();}
+        		getUserLocation();	
+			});
+			$('#searchForm').submit(function(e){
+				e.preventDefault()
+				$('#restart').slideToggle();
+				$('#searchDiv').slideToggle();
+				$.ajax({
+					url: $(this).attr('action'),
+					method: 'post',
+					data: $(this).serialize(),
+					success: function(serverResponse){
+					}
+				})
+				document.getElementById("Lat").value = 0;
+				document.getElementById("Lng").value = 0;
+			});
+			$('#restart').click(function(){
+				$('#restart').slideToggle();
+				$('#searchDiv').slideToggle();
+				getUserLocation();
+			});
+		})
+        </script>
+    <script type="text/javascript">
+
+        // Escapes HTML characters in a template literal string, to prevent XSS.
+        function sanitizeHTML(strings) {
+            const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            let result = strings[0];
+            for (let i = 1; i < arguments.length; i++) {
+                result += String(arguments[i]).replace(/[&<>'"]/g, (char) => {
+                    return entities[char];
+                });
+                result += strings[i];
+            }
+            return result;
+        }
+
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                //initial location and zoom
+                center: { lat: 47.621948, lng: -122.212865 },
+                zoom: 10,
+                styles: mapStyle
+            });
+            //description for users
+            const infoWindow = new google.maps.InfoWindow();
+            infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
+
+            //markers
+            var markers = locations.map(function (location, id) {
+                var markers_id = ids_arr[id % ids_arr.length]
+                var marker = new google.maps.Marker({
+                    position: location,
+                    //just to keep ID for now
+                    label: markers_id,
+                    icon: "{% static 'maps/img/user.png' %}",
+                });
+                //show the info when clicked
+                marker.addListener('click', function() {
+                const name = 'Dima' + ' ' + 'Lebedev'
+                const activity = 'Drinking'
+                const description = 'Here till midnigth, come join me.'
+                const content = sanitizeHTML`
+                <h2>${name}</h2>
+                <h3>${activity}</h3>
+                <p>Description: ${description}</p>
+                `
+                infoWindow.setContent(content);
+                infoWindow.setPosition(location);
+                infoWindow.open(map);
+                });
+                return marker
+            });
+
+            //clusters
+            var markerCluster = new MarkerClusterer(map, markers, { imagePath: 'https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/images/m' });
+        }
+        // map style
+        // Style credit: https://snazzymaps.com/style/1/pale-dawn
+        const mapStyle = [
+            {
+                "featureType": "administrative",
+                "elementType": "all",
+                "stylers": [
+                    {
+                        "visibility": "on"
+                    },
+                    {
+                        "lightness": 33
+                    }
+                ]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "all",
+                "stylers": [
+                    {
+                        "color": "#f2e5d4"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.park",
+                "elementType": "geometry",
+                "stylers": [
+                    {
+                        "color": "#c5dac6"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.park",
+                "elementType": "labels",
+                "stylers": [
+                    {
+                        "visibility": "on"
+                    },
+                    {
+                        "lightness": 20
+                    }
+                ]
+            },
+            {
+                "featureType": "road",
+                "elementType": "all",
+                "stylers": [
+                    {
+                        "lightness": 20
+                    }
+                ]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry",
+                "stylers": [
+                    {
+                        "color": "#c5c6c6"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [
+                    {
+                        "color": "#e4d7c6"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [
+                    {
+                        "color": "#fbfaf7"
+                    }
+                ]
+            },
+            {
+                "featureType": "water",
+                "elementType": "all",
+                "stylers": [
+                    {
+                        "visibility": "on"
+                    },
+                    {
+                        "color": "#acbcc9"
+                    }
+                ]
+            }
+        ];
+        //getting the locations and ids from views
+        var locations = []
+        var ids = []
+        //transforming the strings into arrays
+        var passed_lat = '{{lat}}'
+        passed_lat = passed_lat.substring(1, passed_lat.length - 1)
+        var lat_arr = passed_lat.split(", ");
+        var passed_lng = '{{lng}}'
+        passed_lng = passed_lng.substring(1, passed_lng.length - 1)
+        var lng_arr = passed_lng.split(", ");
+        var passed_ids = '{{ids}}'
+        passed_ids = passed_ids.substring(1, passed_ids.length - 1)
+        var ids_arr = passed_ids.split(", ")
+        for (each in lat_arr) {
+            locations.push({ lat: parseFloat(lat_arr[each]), lng: parseFloat(lng_arr[each]) })
+        }
+        //-----------------------------------
+    </script>
+    <!-- cluster api -->
+    <script src="https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/src/markerclusterer.js">
+    </script>
+    <!-- maps api -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIYyxkvanrHlRUIWgI1aGZSPs4HY974q8&callback=initMap" async
+        defer></script>
+    
+</body>
+
+</html>

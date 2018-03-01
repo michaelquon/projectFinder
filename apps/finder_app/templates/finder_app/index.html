@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Login/Register</title>
+	</head>
+	<body>
+		<h1>Welcome!</h1>
+		{% if messages %}
+			<ul>
+				{% for message in messages %}
+					<li style="color: red;">{{ message }}</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+		<div style="display: inline-block;">
+			<form action="/process" method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+				<fieldset style="border: 2px solid black; width: 400px;">
+					<legend style="padding: 0.2em 0.3em "><h2>Register</h2></legend>
+					<table>
+						<tbody>
+							<tr>
+								<td>First Name:</td>
+								<td><input type="text" name="first"></td>
+							</tr>
+							<tr>
+								<td>Last Name:</td>
+								<td><input type="text" name="last"></td>
+							</tr>
+							<tr>
+								<td>Username:</td>
+								<td><input type="text" name="username"></td>
+							</tr>
+							<tr>
+								<td>Email:</td>
+								<td><input type="text" name="email"></td>
+							</tr>
+							<tr>
+								<td>Phone Number:</td>
+								<td><input type="tel" name="phonenum" placeholder="ex: 2223334444"></td>
+							</tr>
+							<tr>
+								<td>Date of Birth:</td>
+								<td><input type="date" name="dob"></td>
+							</tr>
+							<tr>
+								<td>Profile Photo:</td>
+								<td><input type="file" name="image" placeholder="Photo"></td>
+							</tr>
+							<tr>
+								<td>Password:</td>
+								<td><input type="password" name="password"></td>
+							</tr>
+							<tr>
+								<td>Confirm Password:</td>
+								<td><input type="password" name="confirm"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td><input type="submit" value="Register" style="float: right;"></td>
+							</tr>
+						</tbody>
+					</table>
+				</fieldset>
+			</form>
+		</div>
+		<div style="display: inline-block;">
+			<form action="/login" method="post">
+			{% csrf_token %}
+			<fieldset style="border: 2px solid black; width: 400px;">
+				<legend style="padding: 0.2em 0.3em "><h2>Login</h2></legend>
+				<table>
+					<tbody>
+						<tr>
+							<td>Username:</td>
+							<td><input type="text" name="logusername"></td>
+						</tr>
+						<tr>
+							<td>Password:</td>
+							<td><input type="password" name="logpassword"></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td><input type="submit" value="Login" style="float: right;"></td>
+						</tr>
+					</tbody>
+				</table>
+			</fieldset>
+			</form>
+		</div>
+	</body>
+</html>
