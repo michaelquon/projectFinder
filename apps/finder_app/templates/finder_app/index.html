@@ -6,7 +6,7 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge"> {% load static %}
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
-	<link rel="stylesheet" href="{% static 'finder_app/css/style.css' %}">
+	<link rel="stylesheet" href="{% static 'finder_app/css/index_style.css' %}">
 	<!-- Compiled and minified CSS -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -40,7 +40,7 @@
 				<label for="email">Email:<input type="text" name="email"></label>
 				<label for="phonenum">Phone Number:<input type="tel" name="phonenum" placeholder="ex: 2223334444"></label>
 				<label for="dob">Date of Birth:<input type="date" class="datepicker" name="dob"></label>
-				<label for="image">Profile Photo:<input type="file" name="image"></label></br>
+				<label for="image">Profile Photo:<input type="file" name="image"></label><br><br>
 				<label for="password">Password:<input type="password" name="password" class="password"></label>
 				<label for="confirm">Confirm Password:<input type="password" name="confirm"></label>
 				<button class="btn waves-effect waves-light" type="submit" name="action" value="Register" style="float: right;">Register
@@ -48,30 +48,6 @@
 				</button>
 			</form>
 		</div>
-<<<<<<< HEAD
-		<div style="display: inline-block;">
-			<form action="/login" method="POST">
-			{% csrf_token %}
-			<fieldset style="border: 2px solid black; width: 400px;">
-				<legend style="padding: 0.2em 0.3em "><h2>Login</h2></legend>
-				<table>
-					<tbody>
-						<tr>
-							<td>Username:</td>
-							<td><input type="text" name="logusername"></td>
-						</tr>
-						<tr>
-							<td>Password:</td>
-							<td><input type="password" name="logpassword"></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td><input type="submit" value="Login" style="float: right;"></td>
-						</tr>
-					</tbody>
-				</table>
-			</fieldset>
-=======
 
 		<div id="login-wrapper" style="float: right;">
 				<img class="finder_img" src="../static/finder_app/img/finder.png" alt="logo">
@@ -84,7 +60,6 @@
 				<button class="btn waves-effect waves-light" type="submit" name="action" value="Login" style="float: right;">Login
 					<i class="material-icons right"></i>
 				</button>
->>>>>>> 85a372e711f4d2e78ef27dbf03f247d7f3dfdb02
 			</form>
 			<div class="text-box">
 				<h3>Welcome to <span class="green-color">Finder</span>!</h3>

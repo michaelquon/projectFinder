@@ -5,6 +5,7 @@ from .models import *
 import math
 from django.contrib import messages
 from django.core import serializers
+
 # Create your views here.
 
 def index(request):
@@ -59,7 +60,7 @@ def dash(request):
 		descriptions.append(each.desc)
 		wheres.append(each.where)
 		starts.append(each.created_at.strftime('%I:%M%p %m/%d'))
-		ends.append(each.endtime)
+		ends.append(each.endtime.strftime('%I:%M%p %m/%d'))
 		joineds.append(len(each.joined_users.all()))
 		max_users.append(each.max_users)
 		join_links.append('join_activity/{}'.format(each.id))

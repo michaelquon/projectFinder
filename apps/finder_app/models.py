@@ -78,8 +78,12 @@ class dbManager(models.Manager):
             else:
                 categoryInput = Category.objects.create(name=postData['newCategory'])
         if len(errors) == 0:
-            endtime = datetime.datetime.now() + timedelta(hours=int(postData['duration']))
-            response['activity'] = Activity.objects.create(category=categoryInput,desc=postData['desc'],lat=postData['actLat'],lng=postData['actLng'],where=postData['where'],endtime=endtime.strftime('%Y-%m-%d %I:%M %p'),created_by=User.objects.get(id=postData['activeUser']),max_users=int(postData['max_users']))
+            HOURS = str(postData['duration'])[:2]
+            MINUTES = str(postData['duration'])[-2:]
+            endtime = datetime.datetime.now() + timedelta(hours=int(HOURS)) + timedelta(minutes=int(MINUTES))
+            created_at = datetime.datetime.now()
+            updated_at = datetime.datetime.now()
+            response['activity'] = Activity.objects.create(category=categoryInput,desc=postData['desc'],lat=postData['actLat'],lng=postData['actLng'],where=postData['where'],endtime=endtime,created_by=User.objects.get(id=postData['activeUser']),created_at=created_at, updated_at=updated_at, max_users=int(postData['max_users']))
         response['errors'] = errors
         return response		
 
@@ -94,25 +98,25 @@ class User(models.Model):
                                 options={'quality': 60})
     phonenumber = models.IntegerField()
     password = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
     objects = dbManager()
     dob = models.DateField()
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
 
 class Activity(models.Model):
     lat = models.CharField(max_length=255)
     lng = models.CharField(max_length=255)
     desc = models.TextField()
     where = models.CharField(max_length=255)
-    endtime = models.CharField(max_length=255)
+    endtime = models.DateTimeField()
     max_users = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
     category = models.ForeignKey(Category, related_name="activities")
     created_by = models.OneToOneField(User, related_name="created_activity")
     joined_users = models.ManyToManyField(User, related_name="joined_activities")
@@ -121,7 +125,7 @@ class Activity(models.Model):
 class Review(models.Model):
     rating = models.IntegerField()
     comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
     written_for = models.ManyToManyField(User, related_name="written_by")
 
