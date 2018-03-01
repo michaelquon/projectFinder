@@ -57,7 +57,13 @@ html, body{
 .image100{
 	width: 10%;
 }
+.image25{
+	width: 25%
+}
 .image{
 	width: 100%;
 	height: 100%;
+}
+.gm-style-iw :only-child{
+	margin: 1px;
 }

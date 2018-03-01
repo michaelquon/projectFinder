@@ -4,6 +4,9 @@ from __future__ import unicode_literals
 from django.db import models
 import bcrypt, re, datetime
 from datetime import timedelta
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
+
 # Create your models here.
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
@@ -39,24 +42,24 @@ class dbManager(models.Manager):
         	response['user'] = User.objects.create(first_name=postData['first'], last_name=postData['last'], username=postData['username'], password=PW, email=postData['email'], phonenumber=postData['phonenum'], dob=postData['dob'], photo=filesData['image'])
         return response
 
-	def loginValidation(self, postData):
-		response = {
-			'status': False,
-		}
-		errors = []
-		users = User.objects.filter(username=postData['logusername'])
-		if len(users) < 1:
-			errors.append('Incorrect Email/Password, Try again')
-			response['errors'] = errors
-			return response
-		PW = bcrypt.checkpw(postData['logpassword'].encode(), users[0].password.encode())
-		if PW == True:
-			response['status'] = True
-			response['user'] = users[0]
-		else: 
-			errors.append('Incorrect Email/Password, Try again')
-			response['errors'] = errors
-		return response
+    def loginValidation(self, postData):
+    	response = {
+        	'status': False,
+    	}
+    	errors = []
+    	users = User.objects.filter(username=postData['logusername'])
+    	if len(users) < 1:
+    		errors.append('Incorrect Email/Password, Try again')
+    		response['errors'] = errors
+    		return response
+    	PW = bcrypt.checkpw(postData['logpassword'].encode(), users[0].password.encode())
+    	if PW == True:
+    		response['status'] = True
+    		response['user'] = users[0]
+    	else: 
+    		errors.append('Incorrect Email/Password, Try again')
+    		response['errors'] = errors
+    	return response
         
     def activityValidation(self,postData):
         response = {
@@ -85,7 +88,10 @@ class User(models.Model):
     last_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
-    photo = models.ImageField(upload_to="media")
+    photo = ProcessedImageField(upload_to="media",
+                                processors=[ResizeToFill(200, 200)],
+                                format='JPEG',
+                                options={'quality': 60})
     phonenumber = models.IntegerField()
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

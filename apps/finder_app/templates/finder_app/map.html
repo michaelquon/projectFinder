@@ -99,15 +99,15 @@
 	{% endif %}
 	</div>
 
-
-
-
-
-
-
-
     <script>
         function getUserLocation(){
+        navigator.geolocation.getCurrentPosition(showUserPosition);
+            }
+            function showUserPosition(position){
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+            }
+        function getSearchLocation(){
 				navigator.geolocation.getCurrentPosition(showUserPosition);
 				}
 				function showUserPosition(position){
@@ -168,7 +168,7 @@
         		if ($('#actFormDiv').is(':visible')){
         			$('#beginCreationDiv').slideToggle();
         			$('#actFormDiv').slideToggle();}
-        		getUserLocation();	
+        		getSearchLocation();	
 			});
 			$('#searchForm').submit(function(e){
 				e.preventDefault()
@@ -187,7 +187,7 @@
 			$('#restart').click(function(){
 				$('#restart').slideToggle();
 				$('#searchDiv').slideToggle();
-				getUserLocation();
+				getSearchLocation();
 			});
 		})
         </script>
@@ -219,22 +219,47 @@
 
             //markers
             var markers = locations.map(function (location, id) {
-                var markers_id = ids_arr[id % ids_arr.length]
+                var markers_id = ids[id % ids.length]
                 var marker = new google.maps.Marker({
                     position: location,
-                    //just to keep ID for now
-                    label: markers_id,
-                    icon: "{% static 'maps/img/user.png' %}",
+                    icon: "{% static 'finder_app/img/user.png' %}",
                 });
                 //show the info when clicked
                 marker.addListener('click', function() {
-                const name = 'Dima' + ' ' + 'Lebedev'
-                const activity = 'Drinking'
-                const description = 'Here till midnigth, come join me.'
+                const picture = pictures[markers_id]
+	            const rating = ratings[markers_id]
+	            const rating_link = rating_links[markers_id]
+	            const name = names[markers_id]
+	            const username = usernames[markers_id]
+	            const category = categories[markers_id]
+	            const description = descriptions[markers_id]
+	            const where = wheres[markers_id]
+	            const start = starts[markers_id]
+	            const end = ends[markers_id]
+	            const joined = joineds[markers_id]
+	            const max_user = max_users[markers_id]
+	            const join_link = join_links[markers_id]
+	            const leave_link = leave_links[markers_id]
+	            const message_link = message_links[markers_id] 
                 const content = sanitizeHTML`
-                <h2>${name}</h2>
-                <h3>${activity}</h3>
-                <p>Description: ${description}</p>
+                <img src="${picture}">
+                <p><a href="${rating_link}">Rating:&nbsp;${rating}</a></p>
+                <h4>${name}&nbsp;(${username})</h4>
+                <p style="font-weight: bold">${category}:</p>
+                <p>${description}</p>
+                <p style="font-weight: bold">Where: ${where}</p>
+                <table>
+                    <tr>
+                        <td>Starts:</td>
+                        <td>${start}</td>
+                    </tr>
+                    <tr>
+                        <td>Ends:</td>
+                        <td>${end}</td>
+                    </tr>
+                </table>
+                <p>Joined:&nbsp;${joined}/${max_user}&nbsp;&nbsp;&nbsp;<a href="${join_link}">Join</a>&nbsp;/&nbsp;<a href="${leave_link}">Leave</a></p>
+                <p><a href="${message_link}">Write a message</a></p>
                 `
                 infoWindow.setContent(content);
                 infoWindow.setPosition(location);
@@ -340,21 +365,48 @@
                 ]
             }
         ];
-        //getting the locations and ids from views
+        //transforming the passed strings into arrays
+        var passed_lat = '{{lat}}'
+        var passed_lng = '{{lng}}'
+        var passed_pictures = '{{pictures}}'
+        var passed_rating = '{{rating}}'
+        var passed_rating_links = '{{rating_links}}'
+        var passed_names = '{{names}}'
+        var passed_username = '{{usernames}}'
+        var passed_categories = '{{category_names}}'
+        var passed_descriptions = '{{descriptions}}'
+        var passed_wheres = '{{wheres}}'
+        var passed_starts = '{{starts}}'
+        var passed_ends = '{{ends}}'
+        var passed_joineds = '{{joineds}}'
+        var passed_max_users = '{{max_users}}'
+        var passed_join_links = '{{join_links}}'
+        var passed_leave_links = '{{leave_links}}'
+        var passed_message_links = '{{message_links}}'
+        passed_rating = passed_rating.substring(1, passed_rating.length - 1)
+        var lat = passed_lat.split(",");
+        var lng = passed_lng.split(",");
+        var pictures = passed_pictures.split(",");
+	    var ratings = passed_rating.split(", ");
+	    var rating_links = passed_rating_links.split(",");
+	    var names = passed_names.split(",");
+	    var usernames = passed_username.split(",");
+	    var categories = passed_categories.split(",");
+	    var descriptions = passed_descriptions.split(",");
+	    var wheres = passed_wheres.split(",");
+	    var starts = passed_starts.split(",");
+	    var ends = passed_ends.split(",");
+	    var joineds = passed_joineds.split(",");
+	    var max_users = passed_max_users.split(",");
+	    var join_links = passed_join_links.split(",");
+	    var leave_links = passed_leave_links.split(",");
+	    var message_links = passed_message_links.split(",");
+        //creating the activities locations
         var locations = []
         var ids = []
-        //transforming the strings into arrays
-        var passed_lat = '{{lat}}'
-        passed_lat = passed_lat.substring(1, passed_lat.length - 1)
-        var lat_arr = passed_lat.split(", ");
-        var passed_lng = '{{lng}}'
-        passed_lng = passed_lng.substring(1, passed_lng.length - 1)
-        var lng_arr = passed_lng.split(", ");
-        var passed_ids = '{{ids}}'
-        passed_ids = passed_ids.substring(1, passed_ids.length - 1)
-        var ids_arr = passed_ids.split(", ")
-        for (each in lat_arr) {
-            locations.push({ lat: parseFloat(lat_arr[each]), lng: parseFloat(lng_arr[each]) })
+        for (var i = 0; i < lat.length; i++) {
+            locations.push({ lat: parseFloat(lat[i]), lng: parseFloat(lng[i]) })
+            ids.push(i)
         }
         //-----------------------------------
     </script>

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect, HttpResponse
 from .models import *
+import math
 from django.contrib import messages
 from django.core import serializers
 # Create your views here.
@@ -20,11 +21,73 @@ def success(request):
 	return render(request, 'finder_app/success.html', context)
 
 def dash(request):
-    context = {
+	lat = []
+	lng = []
+	pictures = []
+	ratings = []
+	rating_links = []
+	names = []
+	usernames = []
+	categories = []
+	descriptions = []
+	wheres = []
+	starts = []
+	ends = []
+	joineds = []
+	max_users = []
+	join_links = []
+	leave_links = []
+	message_links = [] 
+
+	activities = Activity.objects.all()
+
+	for each in activities:
+		lat.append(each.lat)
+		lng.append(each.lng)
+		pictures.append(each.created_by.photo.url)
+		reviews = Review.objects.filter(written_for=each.created_by.id)
+		rating = 0
+		if (len(reviews)):
+			for each in reviews:
+				rating += each.rating
+			rating = rating/len(reviews)
+		ratings.append(round(rating, 1))
+		rating_links.append('leave_review/{}'.format(each.created_by.id))
+		names.append('{} {}'.format(each.created_by.first_name, each.created_by.last_name))
+		usernames.append(each.created_by.username)
+		categories.append(each.category.name)
+		descriptions.append(each.desc)
+		wheres.append(each.where)
+		starts.append(each.created_at.strftime('%I:%M%p %m/%d'))
+		ends.append(each.endtime)
+		joineds.append(len(each.joined_users.all()))
+		max_users.append(each.max_users)
+		join_links.append('join_activity/{}'.format(each.id))
+		leave_links.append('leave_activity/{}'.format(each.id))
+		message_links.append('write_message/{}'.format(each.created_by.id))
+		
+	context = {
+		'lat': ",".join(str(x) for x in lat),
+		'lng': ",".join(str(x) for x in lng),
+	    'pictures': ",".join(str(x) for x in pictures),
+		'rating': ratings,
+		'rating_links': ",".join(str(x) for x in rating_links),
+		'names': ",".join(str(x) for x in names),
+		'usernames': ",".join(str(x) for x in usernames),
+		'category_names': ",".join(str(x) for x in categories),
+		'descriptions': ",".join(str(x) for x in descriptions),
+		'wheres': ",".join(str(x) for x in wheres),
+		'starts': ",".join(str(x) for x in starts),
+		'ends': ",".join(str(x) for x in ends),
+		'joineds': ",".join(str(x) for x in joineds),
+		'max_users': ",".join(str(x) for x in max_users),
+		'join_links': ",".join(str(x) for x in join_links),
+		'leave_links': ",".join(str(x) for x in leave_links),
+		'message_links': ",".join(str(x) for x in message_links),
 		'categories': Category.objects.all(),
-        'user': User.objects.get(id=request.session['user_id'])
+		'user': User.objects.get(id=request.session['user_id']),
 	}
-    return render(request, 'finder_app/map.html', context)
+	return render(request, 'finder_app/map.html', context)
 
 def process(request):
 	result = User.objects.regValidation(request.POST, request.FILES)
@@ -52,7 +115,6 @@ def logout(request):
 def display_user(request):
 	users = User.objects.get(id=1)
 	user1 = users.username
-	print user1
 	return HttpResponse(user1)
 
 def addActivity(request):
