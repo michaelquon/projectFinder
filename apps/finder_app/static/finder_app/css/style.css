@@ -1,0 +1,62 @@
+*{
+    margin: 0px;
+    padding: 0px;
+}
+#main-wrapper{
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 40px;
+}
+#register-wrapper{
+    width: 400px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 20px;
+    margin-right: 40px;
+
+}
+#login-wrapper{
+    width: 400px;
+    display: inline-block;
+    margin-right: 40px;
+    vertical-align: top;
+}
+.rotate{
+    display: inline-block;
+    vertical-align: top;
+    margin-top: -32px;
+    
+    width: 100%;
+    max-width: 50%;
+    height: auto;
+    
+}
+.mySlides{
+    width:100%;
+}
+
+body{
+    background-image: url(../img/mapbkg.png);
+    background-size: 50%;
+    float: right;
+}
+.social{
+    width: 40px;
+    display: inline-block;
+    margin-top: 50px;
+    
+}
+.text-box{
+    margin-top: 100px;
+    width: 400px;
+    height: 300px;
+}
+.green-color{
+    color:#00A79D;
+}
+.purple-color{
+    color:#9B6499;
+}
+.finder_img{
+    margin-top: 40px;
+}
