@@ -7,6 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge"> {% load static %}
     <link rel="stylesheet" href="{% static 'finder_app/css/map_style.css' %}">
     <!-- jquery -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <title>MainMap</title>
 </head>
@@ -16,7 +20,7 @@
     <div class='activity image10' id='userPhotoDiv'>
         <img class="image" src="{{ user.photo.url }}">
     </div>
-    <div class="activity image100" id='userProfileDiv'>
+    <div class="activity image100 card-body" id='userProfileDiv'>
         <img class="image" src="{{ user.photo.url }}">
         <h2>{{ user.username }}</h2>
         <h4>{{ user.first_name }} &nbsp; {{  user.last_name }}</h4>
@@ -38,13 +42,48 @@
         {% endfor %}
         {% endif %}
         <a href="delete_activity/{{user.created_activity.id}}">End activity</a>
-        
         {% endif %}
+        <!--  from here -->
+        <h3><a id="mymessages" href="#">Messages</a></h3> <!-- Quan please remove styling from html and add it into css thanks apreciate you!-->
+        <!--to here-->
+        <br>
         <a href="/logout">Logout</a>
     </div>
-    <div class='activity' id="startSearchDiv">
-		<u>Look for event where you are</u>
-	</div>
+    <!-- Quan please remove styling from html and add it into css thanks apreciate you!-->
+    <div id="displaymymsg" style="border: 2px solid black; min-height: 100px; min-width: 100px; left: 1%; top: 20%; position: fixed; text-align: center; background-color: silver; display: none;">
+        {% for i in groupedmsg %}
+        <div>
+            <p id="viewmsg">
+                <a href="/write_message/{{ i.written_by.id }}">{{ i.written_by.first_name }}&nbsp;{{ i.written_by.last_name }}</a>
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+    {% if msgcheck == True %}
+    <div class="messages" style=" position: fixed; left: 20%; top: 20%; background-color: silver;">
+        <form action="/closeMessages">
+        <input type="submit" value="close">
+        </form>
+        <div class="displaymsg" style="width: 375px; height: 400px; overflow-y: scroll;">
+            {% for msg in allmsg %}
+            <div>
+                <p style="display: inline-block;">{% if msg.written_by != user %}{{ msg.written_by.first_name }}:{% endif %} </p>
+                <div style="display: inline-block; vertical-align: top; background-color: green; min-height: 50px; margin-top: 10px; width: 150px; border-radius: 5px; margin-left: 15px;">
+                    <p style="display: inline-block; margin-left: 5px;">{{ msg.message }}</p>
+                </div>
+                <p style="font-size: 8px; display: inline-block;">{{ msg.created_at }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <form class="submitmsg" action="/processMessage" method="post" style="text-align: center; margin-top: 10px; margin-bottom: 5px;">
+            {% csrf_token %}
+            <textarea class="textarea" name="message" style="width: 250px; min-height: 50px; display: inline-block; vertical-align: middle;"></textarea>
+            <input style="display: inline-block;" type="submit" name="send" value="Send">
+        </form>
+    </div>
+    {% endif %}
+    <!-- to here -->
+    <button id="startSearchDiv" type="button" class="activity btn btn-info-lg"><strong><h3>Find events around you</h3></strong></button>
 	<div class='activity' id="searchDiv">
 		<form action="/activity/search" method="post" id="searchForm">
 			{% csrf_token %}
@@ -54,15 +93,11 @@
 					<option value="{{ category.id }}">{{ category.name }}</option>
 				{% endfor %}
 			</select>
-			<input type="submit" value="Search">
+			<input class="search-btn" type="submit" value="Search">
 		</form>
 	</div>
-	<div class="activity" id="restart">
-		<u>Search</u>
-	</div>
-	<div class='activity' id='beginCreationDiv'>
-		<u>Create an activity</u>
-	</div>
+    <button id="restart" type="button" class="activity btn btn-info-lg"><strong>Search</strong></button>
+    <button id='beginCreationDiv' type="button" class="activity btn btn-info-l"><strong>Create an activity</strong></button>
 	<div class='activity' id='actFormDiv'>
 	<form action="/activity/register" method="post" id="activityForm">
 		{% csrf_token %}
@@ -70,7 +105,7 @@
 			<tr>
 				<td>Choose category of activity:</td>
 				<td>
-					<select name="categoryId">
+					<select class="cate" name="categoryId">
 						{% for category in categories %}
 							<option value="{{ category.id }}">{{ category.name }}</option>
 						{% endfor %}
@@ -99,7 +134,7 @@
             </tr>
 			<tr>
 				<td></td>
-				<td><input type="submit" id="submitButton" value="Post Activity"></td>
+				<td><input class="search-btn" type="submit" id="submitButton" value="Post Activity" style="float: right;"></td>
 			</tr>
 		</table>
 		<input type="hidden" name="actLat" id="actLat">
@@ -134,7 +169,34 @@
         </form>
     </div>
     {% endif %}
-    
+    <!-- from here -->
+    <script>
+        $(document).ready(function () {
+            $('.submitmsg').submit(function (e) {
+                var that = this
+                e.preventDefault()
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'post',
+                    data: $(this).serialize(),
+                    success: function (serverResponse) {
+                    }
+                });
+                that.reset();
+            });
+            if ($(".messages").is(':visible')) {
+                setInterval(function () {
+                    $('.displaymsg').load(location.href + " .displaymsg>*", "");
+                    $(".displaymsg").scrollTop($(".displaymsg")[0].scrollHeight);
+                }, 6000)
+            }
+            $('#mymessages').click(function () {
+                $('#displaymymsg').slideToggle();
+            });
+        });
+    </script>
+    <!-- to here -->
+
     <script>
         function getUserLocation(){
         navigator.geolocation.getCurrentPosition(showUserPosition);
@@ -168,67 +230,38 @@
                 $('#restart').css('display','inline-block');
             }
 			$('#beginCreationDiv').click(function(){
-				$('#beginCreationDiv').slideToggle();
-				$('#actFormDiv').slideToggle(function(){
+				$('#beginCreationDiv').fadeToggle();
+				$('#actFormDiv').fadeToggle(function(){
 					if ($(this).is(':visible'))
         			$(this).css('display','inline-block');
 				});
 				if ($('#searchDiv').is(':visible')){
-        			$('#startSearchDiv').slideToggle();
-        			$('#searchDiv').slideToggle();}
+        			$('#startSearchDiv').fadeToggle();
+        			$('#searchDiv').fadeToggle();}
         		getActivityLocation();	
 			});
             $('#userPhotoDiv').click(function(){
-                $('#userPhotoDiv').slideToggle();
-                $('#userProfileDiv').slideToggle();
+                $('#userPhotoDiv').fadeToggle();
+                $('#userProfileDiv').fadeToggle();
             });
             $('#userProfileDiv').click(function(){
-                $('#userPhotoDiv').slideToggle();
-                $('#userProfileDiv').slideToggle();
+                $('#userPhotoDiv').fadeToggle();
+                $('#userProfileDiv').fadeToggle();
             });
-			// $('#activityForm').submit(function(e){
-			// 	e.preventDefault()
-			// 	$('#beginCreationDiv').slideToggle();
-			// 	$('#actFormDiv').slideToggle();
-			// 	$.ajax({
-			// 		url: $(this).attr('action'),
-			// 		method: 'post',
-			// 		data: $(this).serialize(),
-			// 		success: function(serverResponse){
-			// 		}
-			// 	})
-			// 	document.getElementById("actLat").value = 0;
-			// 	document.getElementById("actLng").value = 0;
-			// });
 			$('#startSearchDiv').click(function(){
-				$('#startSearchDiv').slideToggle();
-				$('#searchDiv').slideToggle(function(){
+				$('#startSearchDiv').fadeToggle();
+				$('#searchDiv').fadeToggle(function(){
 					if ($(this).is(':visible'))
         			$(this).css('display','inline-block');
         		});
         		if ($('#actFormDiv').is(':visible')){
-        			$('#beginCreationDiv').slideToggle();
-        			$('#actFormDiv').slideToggle();}
+        			$('#beginCreationDiv').fadeToggle();
+        			$('#actFormDiv').fadeToggle();}
         		getSearchLocation();	
 			});
-			// $('#searchForm').submit(function(e){
-			// 	// e.preventDefault()
-			// 	$('#restart').slideToggle();
-			// 	$('#searchDiv').slideToggle();
-				// $.ajax({
-				// 	url: $(this).attr('action'),
-				// 	method: 'post',
-				// 	data: $(this).serialize(),
-				// 	success: function(serverResponse){
-				// 	}
-				// })
-            //     $('#map').load('/main')
-			// 	document.getElementById("Lat").value = 0;
-			// 	document.getElementById("Lng").value = 0;
-			// });
 			$('#restart').click(function(){
-				$('#restart').slideToggle();
-				$('#searchDiv').slideToggle();
+				$('#restart').fadeToggle();
+				$('#searchDiv').fadeToggle();
 				$('#map').load('/clearSearch')
 			});
 		})
@@ -285,7 +318,7 @@
 	            const message_link = message_links[markers_id] 
                 const content = sanitizeHTML`
                 <img src="${picture}">
-                <p><a href="${rating_link}">Rating:&nbsp;${rating}</a></p>
+                <p><a href="${rating_link}" class="rating_link">Rating:&nbsp;${rating}</a></p>
                 <h4>${name}&nbsp;(${username})</h4>
                 <p style="font-weight: bold">${category}:</p>
                 <p>${description}</p>
@@ -301,7 +334,7 @@
                     </tr>
                 </table>
                 <p>Joined:&nbsp;${joined}/${max_user}&nbsp;&nbsp;&nbsp;<a href="${join_link}">${join_message}</a></p>
-                <p><a href="${message_link}">Write a message</a></p>
+                <p class="newMessage"><a href="${message_link}">Write a message</a></p>
                 `
                 infoWindow.setContent(content);
                 infoWindow.setPosition(location);

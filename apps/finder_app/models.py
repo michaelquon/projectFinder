@@ -130,3 +130,9 @@ class Review(models.Model):
     written_for = models.ManyToManyField(User, related_name="has_reviews")
     written_by = models.ForeignKey(User, related_name="reviewer")
 
+class Message(models.Model):
+    message = models.TextField()
+    written_by = models.ForeignKey(User, related_name='wrote')
+    written_for = models.ForeignKey(User, related_name='wrote_to')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

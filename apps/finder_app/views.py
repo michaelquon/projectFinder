@@ -13,6 +13,17 @@ def index(request):
 	return render(request, 'finder_app/index.html')
 
 def dash(request): 
+	# Eric
+	activeuser = User.objects.get(id=request.session['user_id'])
+	allmsg = ''
+	otheruser = ''
+	msgcheck = False
+	if 'writeTo' in request.session:
+		otheruser = User.objects.get(id=request.session['writeTo'])
+		allmsg = Message.objects.filter(written_by=activeuser).filter(written_for=otheruser).order_by('created_at') | Message.objects.filter(written_for=activeuser).filter(written_by=otheruser).order_by('created_at')
+		msgcheck = True
+	groupedmsg = Message.objects.raw('SELECT * FROM finder_app_message WHERE written_for_id ={} GROUP BY written_by_id'.format(activeuser.id))
+	# END
 	dashReviews = Review.objects.filter(written_for=request.session['user_id'])
 	dashRating = 0
 	if (len(dashReviews)):
@@ -94,9 +105,15 @@ def dash(request):
 				'join_messages': ",".join(str(x) for x in join_messages),
 				'message_links': ",".join(str(x) for x in message_links),
 				'categories': Category.objects.all(),
-				'user': User.objects.get(id=request.session['user_id']),
 				'dashrating': dashRating,
 				'reviews': User.objects.get(id=request.session['view_review_id']).has_reviews.all(),
+				#---------------------------------------------------------
+				'user': activeuser,
+				'allmsg': allmsg, 
+				'otheruser': otheruser,
+				'groupedmsg': groupedmsg,
+				'msgcheck': msgcheck
+				#------------------------------------------------------
 			}
 				
 		else:	
@@ -119,15 +136,27 @@ def dash(request):
 				'join_messages': ",".join(str(x) for x in join_messages),
 				'message_links': ",".join(str(x) for x in message_links),
 				'categories': Category.objects.all(),
-				'user': User.objects.get(id=request.session['user_id']),
 				'dashrating': dashRating,
+				#---------------------------------------------------------
+				'user': activeuser,
+				'allmsg': allmsg, 
+				'otheruser': otheruser,
+				'groupedmsg': groupedmsg,
+				'msgcheck': msgcheck
+				#------------------------------------------------------
 			}
 		return render(request, 'finder_app/map.html', context)
 	else:
 		context = {
 			'categories': Category.objects.all(),
-			'user': User.objects.get(id=request.session['user_id']),
-			'dashrating': dashRating,		
+			'dashrating': dashRating,	
+			#---------------------------------------------------------
+			'user': activeuser,
+			'allmsg': allmsg, 
+			'otheruser': otheruser,
+			'groupedmsg': groupedmsg,
+			'msgcheck': msgcheck
+			#------------------------------------------------------	
 		}
 		return render(request, 'finder_app/map.html', context)
 
@@ -211,3 +240,18 @@ def viewReview(request, number):
 def exitReview(request):
 	del request.session['view_review_id']
 	return redirect('/main')
+#--------------------------------------------------------------------------------------
+def messagesid(request, number):
+	request.session['writeTo'] = number
+	return redirect('/main')
+
+def closeMessages(request):
+	del request.session['writeTo']
+	return redirect('/main')
+
+def processMessage(request):
+	activeuser = User.objects.get(id=request.session['user_id'])
+	otheruser = User.objects.get(id=request.session['writeTo'])
+	Message.objects.create(message=request.POST['message'], written_by=activeuser, written_for=otheruser, created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
+	return redirect('/main')
+#----------------------------------------------------------------------------------------

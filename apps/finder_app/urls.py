@@ -16,4 +16,7 @@ urlpatterns = [
 	url(r'^leave_review/(?P<number>\d+)$', views.leaveReview),
 	url(r'^view_review/(?P<number>\d+)$', views.viewReview),
 	url(r'^close_review$', views.exitReview),
+	url(r'^write_message/(?P<number>\d+)$', views.messagesid),
+    url(r'^processMessage$', views.processMessage),
+    url(r'^closeMessages$', views.closeMessages),
 ]
