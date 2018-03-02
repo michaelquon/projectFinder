@@ -29,8 +29,6 @@
 	<div class='activity' id="searchDiv">
 		<form action="/activity/search" method="post" id="searchForm">
 			{% csrf_token %}
-			<input type="hidden" name="Lat" id="Lat">
-			<input type="hidden" name="Lng" id="Lng">
 			Activity you are interested in:
 			<select name="categoryId">
 				{% for category in categories %}
@@ -126,6 +124,11 @@
 					document.getElementById("actLng").value = lng;
 				}
 		$(document).ready(function(){
+            if ('{{ request.session.searchID }}'.length){
+                $('#searchDiv').css('display','none');
+                $('#startSearchDiv').css('display','none');
+                $('#restart').css('display','inline-block');
+            }
 			$('#beginCreationDiv').click(function(){
 				$('#beginCreationDiv').slideToggle();
 				$('#actFormDiv').slideToggle(function(){
@@ -145,20 +148,20 @@
                 $('#userPhotoDiv').slideToggle();
                 $('#userProfileDiv').slideToggle();
             });
-			$('#activityForm').submit(function(e){
-				e.preventDefault()
-				$('#beginCreationDiv').slideToggle();
-				$('#actFormDiv').slideToggle();
-				$.ajax({
-					url: $(this).attr('action'),
-					method: 'post',
-					data: $(this).serialize(),
-					success: function(serverResponse){
-					}
-				})
-				document.getElementById("actLat").value = 0;
-				document.getElementById("actLng").value = 0;
-			});
+			// $('#activityForm').submit(function(e){
+			// 	e.preventDefault()
+			// 	$('#beginCreationDiv').slideToggle();
+			// 	$('#actFormDiv').slideToggle();
+			// 	$.ajax({
+			// 		url: $(this).attr('action'),
+			// 		method: 'post',
+			// 		data: $(this).serialize(),
+			// 		success: function(serverResponse){
+			// 		}
+			// 	})
+			// 	document.getElementById("actLat").value = 0;
+			// 	document.getElementById("actLng").value = 0;
+			// });
 			$('#startSearchDiv').click(function(){
 				$('#startSearchDiv').slideToggle();
 				$('#searchDiv').slideToggle(function(){
@@ -170,24 +173,25 @@
         			$('#actFormDiv').slideToggle();}
         		getSearchLocation();	
 			});
-			$('#searchForm').submit(function(e){
-				e.preventDefault()
-				$('#restart').slideToggle();
-				$('#searchDiv').slideToggle();
-				$.ajax({
-					url: $(this).attr('action'),
-					method: 'post',
-					data: $(this).serialize(),
-					success: function(serverResponse){
-					}
-				})
-				document.getElementById("Lat").value = 0;
-				document.getElementById("Lng").value = 0;
-			});
+			// $('#searchForm').submit(function(e){
+			// 	// e.preventDefault()
+			// 	$('#restart').slideToggle();
+			// 	$('#searchDiv').slideToggle();
+				// $.ajax({
+				// 	url: $(this).attr('action'),
+				// 	method: 'post',
+				// 	data: $(this).serialize(),
+				// 	success: function(serverResponse){
+				// 	}
+				// })
+            //     $('#map').load('/main')
+			// 	document.getElementById("Lat").value = 0;
+			// 	document.getElementById("Lng").value = 0;
+			// });
 			$('#restart').click(function(){
 				$('#restart').slideToggle();
 				$('#searchDiv').slideToggle();
-				getSearchLocation();
+				$('#map').load('/clearSearch')
 			});
 		})
         </script>
@@ -209,10 +213,11 @@
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
                 //initial location and zoom
-                center: { lat: 47.621948, lng: -122.212865 },
+                center: { lat: parseFloat("{{request.session.lat}}"), lng: parseFloat("{{request.session.lng}}") },
                 zoom: 10,
                 styles: mapStyle
             });
+            console.log(parseFloat("{{request.session.lat}}"))
             //description for users
             const infoWindow = new google.maps.InfoWindow();
             infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
@@ -239,7 +244,7 @@
 	            const joined = joineds[markers_id]
 	            const max_user = max_users[markers_id]
 	            const join_link = join_links[markers_id]
-	            const leave_link = leave_links[markers_id]
+	            const join_message = join_messages[markers_id]
 	            const message_link = message_links[markers_id] 
                 const content = sanitizeHTML`
                 <img src="${picture}">
@@ -258,7 +263,7 @@
                         <td>${end}</td>
                     </tr>
                 </table>
-                <p>Joined:&nbsp;${joined}/${max_user}&nbsp;&nbsp;&nbsp;<a href="${join_link}">Join</a>&nbsp;/&nbsp;<a href="${leave_link}">Leave</a></p>
+                <p>Joined:&nbsp;${joined}/${max_user}&nbsp;&nbsp;&nbsp;<a href="${join_link}">${join_message}</a></p>
                 <p><a href="${message_link}">Write a message</a></p>
                 `
                 infoWindow.setContent(content);
@@ -381,8 +386,9 @@
         var passed_joineds = '{{joineds}}'
         var passed_max_users = '{{max_users}}'
         var passed_join_links = '{{join_links}}'
-        var passed_leave_links = '{{leave_links}}'
+        var passed_join_messages = '{{join_messages}}'
         var passed_message_links = '{{message_links}}'
+        console.log(passed_join_messages)
         passed_rating = passed_rating.substring(1, passed_rating.length - 1)
         var lat = passed_lat.split(",");
         var lng = passed_lng.split(",");
@@ -399,7 +405,7 @@
 	    var joineds = passed_joineds.split(",");
 	    var max_users = passed_max_users.split(",");
 	    var join_links = passed_join_links.split(",");
-	    var leave_links = passed_leave_links.split(",");
+	    var join_messages = passed_join_messages.split(",");
 	    var message_links = passed_message_links.split(",");
         //creating the activities locations
         var locations = []

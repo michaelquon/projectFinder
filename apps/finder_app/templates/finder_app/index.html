@@ -34,6 +34,8 @@
 			<form action="/process" method="post" enctype="multipart/form-data">
 				{% csrf_token %}
 				<h2>Register</h2>	
+				<input type="hidden" id="Lat2" name="lat">
+				<input type="hidden" id="Lng2" name="lng">
 				<label for="first">First Name:<input type="text" name="first"></label>		
 				<label for="last">Last Name:<input type="text" name="last"></label>
 				<label for="username">Username:<input type="text" name="username"></label>
@@ -54,6 +56,8 @@
 			<form action="/login" method="post">
 				{% csrf_token %}
 				<h2>Login</h2>
+				<input type="hidden" id="Lat1" name="lat">
+				<input type="hidden" id="Lng1" name="lng">
 				<label for="logusername">Username:<input type="text" name="logusername"></label>
 				<label for="logpassword">Password:<input type="password" name="logpassword"></label>
 				<!-- <input type="submit" value="Login" style="float: right;">	 -->
@@ -92,6 +96,20 @@
 			x[myIndex-1].style.display = "block";  
 			setTimeout(carousel, 5000);
 		}
+		function getUserLocation(){
+        	navigator.geolocation.getCurrentPosition(showUserPosition);
+            }
+        function showUserPosition(position){
+			var lat = position.coords.latitude;
+			document.getElementById("Lat1").value = lat;
+			document.getElementById("Lat2").value = lat;
+			var lng = position.coords.longitude;
+			document.getElementById("Lng1").value = lng;
+			document.getElementById("Lng2").value = lng;
+		}
+		$(document).ready(function(){
+			getUserLocation();
+		})
 		</script>
 </body>
 

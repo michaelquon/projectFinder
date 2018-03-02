@@ -98,15 +98,15 @@ class User(models.Model):
                                 options={'quality': 60})
     phonenumber = models.IntegerField()
     password = models.CharField(max_length=255)
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     objects = dbManager()
     dob = models.DateField()
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Activity(models.Model):
     lat = models.CharField(max_length=255)
@@ -125,7 +125,7 @@ class Activity(models.Model):
 class Review(models.Model):
     rating = models.IntegerField()
     comment = models.TextField()
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     written_for = models.ManyToManyField(User, related_name="written_by")
 
