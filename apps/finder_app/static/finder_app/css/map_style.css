@@ -26,6 +26,11 @@ html, body{
 	top: 5%;
 	text-align: center;
 }
+#reviewsDiv{
+    display: inline-block;
+    left: 90%;
+    top: 10%;
+}
 #beginCreationDiv{
 	display: inline-block;
 	left: 80%;

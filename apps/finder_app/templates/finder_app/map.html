@@ -20,7 +20,26 @@
         <img class="image" src="{{ user.photo.url }}">
         <h2>{{ user.username }}</h2>
         <h4>{{ user.first_name }} &nbsp; {{  user.last_name }}</h4>
-        <p>{{ user.dob }}</p>
+        <p>Your Rating: {{ dashrating }}</p>
+        {% if user.joined_activities.all %}
+        <p>Joined {{ user.joined_activities.all.count }} activities:</p>
+        {% for each in user.joined_activities.all %}
+        <p>You've joined a(n) {{each.category.name}} activity</p>
+        <a href="leave_activity/{{each.id}}">Leave</a>
+        {% endfor %}
+        {% endif %}
+
+        {% if user.created_activity %}
+        <p>You've started a(n) {{user.created_activity.category.name}} activity at {{user.created_activity.created_at}}</p>
+        {% if user.created_activity.joined_users.all %}
+        <p>Joined users:</p>
+        {% for each in user.created_activity.joined_users.all %}
+        <p>{{each.first_name}}&nbsp;{{each.last_name}}</p>
+        {% endfor %}
+        {% endif %}
+        <a href="delete_activity/{{user.created_activity.id}}">End activity</a>
+        
+        {% endif %}
         <a href="/logout">Logout</a>
     </div>
     <div class='activity' id="startSearchDiv">
@@ -39,10 +58,10 @@
 		</form>
 	</div>
 	<div class="activity" id="restart">
-		<u>Search again</u>
+		<u>Search</u>
 	</div>
 	<div class='activity' id='beginCreationDiv'>
-		<u>Let people know what you are doing</u>
+		<u>Create an activity</u>
 	</div>
 	<div class='activity' id='actFormDiv'>
 	<form action="/activity/register" method="post" id="activityForm">
@@ -75,7 +94,7 @@
                 <td><input type="text" name="duration" placeholder="HH:MM"></td>
             </tr>
             <tr>
-                <td>What to look for:</td>
+                <td>Where:</td>
                 <td><input type="text" name="where"></td>
             </tr>
 			<tr>
@@ -87,16 +106,35 @@
 		<input type="hidden" name="actLng" id="actLng">
 		<input type="hidden" name="activeUser" value="{{ user.id }}">		
 	</form>
-	{% if messages %}
-		I got here
-		<ul class="messages">
-			{% for message in messages %}
-				<li class="{{ message.tags }}">{{ message }}</li>
-			{% endfor %}
-		</ul>
-	{% endif %}
-	</div>
-
+    </div>
+    
+    {% if request.session.view_review_id %}
+    <div class="activity" id="reviewsDiv"> 
+        {% for review in reviews %}
+            <h3>Written by {{ review.written_by.first_name }} &nbsp; {{ review.written_by.last_name }}</h3>
+            <p>Rating: {{review.rating}}</p>
+            <p>Comment: {{ review.comment }}</p>
+        {% endfor %}
+        <form action="leave_review/{{ request.session.view_review_id }}" method="post">
+            {% csrf_token %} 
+            <input type="hidden" name="reviewingUser" value="{{ request.session.user_id }}"> 
+            <select name="rating">
+                <option value="5">5</option> 
+                <option value="4">4</option> 
+                <option value="3">3</option> 
+                <option value="2">2</option> 
+                <option value="1">1</option> 
+            </select> 
+            <input type="text" name="comment"> 
+            <input type="submit" value="Submit Review"> 
+        </form> 
+        <form action=/close_review method="POST">
+            {% csrf_token %}
+            <input type="submit" value="Exit reviews"> 
+        </form>
+    </div>
+    {% endif %}
+    
     <script>
         function getUserLocation(){
         navigator.geolocation.getCurrentPosition(showUserPosition);
@@ -217,7 +255,6 @@
                 zoom: 10,
                 styles: mapStyle
             });
-            console.log(parseFloat("{{request.session.lat}}"))
             //description for users
             const infoWindow = new google.maps.InfoWindow();
             infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
@@ -388,7 +425,6 @@
         var passed_join_links = '{{join_links}}'
         var passed_join_messages = '{{join_messages}}'
         var passed_message_links = '{{message_links}}'
-        console.log(passed_join_messages)
         passed_rating = passed_rating.substring(1, passed_rating.length - 1)
         var lat = passed_lat.split(",");
         var lng = passed_lng.split(",");

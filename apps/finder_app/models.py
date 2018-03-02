@@ -127,5 +127,6 @@ class Review(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    written_for = models.ManyToManyField(User, related_name="written_by")
+    written_for = models.ManyToManyField(User, related_name="has_reviews")
+    written_by = models.ForeignKey(User, related_name="reviewer")
 

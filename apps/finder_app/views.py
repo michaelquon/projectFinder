@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 
 from django.shortcuts import render, redirect, HttpResponse
 from .models import *
@@ -6,12 +6,20 @@ import math
 from django.contrib import messages
 from django.core import serializers
 
+
 # Create your views here.
 
 def index(request):
 	return render(request, 'finder_app/index.html')
 
 def dash(request): 
+	dashReviews = Review.objects.filter(written_for=request.session['user_id'])
+	dashRating = 0
+	if (len(dashReviews)):
+		for eachDashReview in dashReviews:
+			dashRating += eachDashReview.rating
+		dashRating = round(dashRating/len(dashReviews), 1)
+
 	if "searchID" in request.session:
 		lat = []
 		lng = []
@@ -41,11 +49,11 @@ def dash(request):
 			reviews = Review.objects.filter(written_for=each.created_by.id)
 			rating = 0
 			if (len(reviews)):
-				for each in reviews:
-					rating += each.rating
+				for eachReview in reviews:
+					rating += eachReview.rating
 				rating = rating/len(reviews)
 			ratings.append(round(rating, 1))
-			rating_links.append('leave_review/{}'.format(each.created_by.id))
+			rating_links.append('view_review/{}'.format(each.created_by.id))
 			names.append('{} {}'.format(each.created_by.first_name, each.created_by.last_name))
 			usernames.append(each.created_by.username)
 			categories.append(each.category.name)
@@ -65,33 +73,61 @@ def dash(request):
 				join_links.append('join_activity/{}'.format(each.id))
 				join_messages.append('Would you like to join?')
 			message_links.append('write_message/{}'.format(each.created_by.id))
-
-		context = {
-			'lat': ",".join(str(x) for x in lat),
-			'lng': ",".join(str(x) for x in lng),
-		    'pictures': ",".join(str(x) for x in pictures),
-			'rating': ratings,
-			'rating_links': ",".join(str(x) for x in rating_links),
-			'names': ",".join(str(x) for x in names),
-			'usernames': ",".join(str(x) for x in usernames),
-			'category_names': ",".join(str(x) for x in categories),
-			'descriptions': ",".join(str(x) for x in descriptions),
-			'wheres': ",".join(str(x) for x in wheres),
-			'starts': ",".join(str(x) for x in starts),
-			'ends': ",".join(str(x) for x in ends),
-			'joineds': ",".join(str(x) for x in joineds),
-			'max_users': ",".join(str(x) for x in max_users),
-			'join_links': ",".join(str(x) for x in join_links),
-			'join_messages': ",".join(str(x) for x in join_messages),
-			'message_links': ",".join(str(x) for x in message_links),
-			'categories': Category.objects.all(),
-			'user': User.objects.get(id=request.session['user_id']),
-		}
+		
+		if "view_review_id" in request.session:
+			context = {
+				'lat': ",".join(str(x) for x in lat),
+				'lng': ",".join(str(x) for x in lng),
+		    	'pictures': ",".join(str(x) for x in pictures),
+				'rating': ratings,
+				'rating_links': ",".join(str(x) for x in rating_links),
+				'names': ",".join(str(x) for x in names),
+				'usernames': ",".join(str(x) for x in usernames),
+				'category_names': ",".join(str(x) for x in categories),
+				'descriptions': ",".join(str(x) for x in descriptions),
+				'wheres': ",".join(str(x) for x in wheres),
+				'starts': ",".join(str(x) for x in starts),
+				'ends': ",".join(str(x) for x in ends),
+				'joineds': ",".join(str(x) for x in joineds),
+				'max_users': ",".join(str(x) for x in max_users),
+				'join_links': ",".join(str(x) for x in join_links),
+				'join_messages': ",".join(str(x) for x in join_messages),
+				'message_links': ",".join(str(x) for x in message_links),
+				'categories': Category.objects.all(),
+				'user': User.objects.get(id=request.session['user_id']),
+				'dashrating': dashRating,
+				'reviews': User.objects.get(id=request.session['view_review_id']).has_reviews.all(),
+			}
+				
+		else:	
+			context = {
+				'lat': ",".join(str(x) for x in lat),
+				'lng': ",".join(str(x) for x in lng),
+		    	'pictures': ",".join(str(x) for x in pictures),
+				'rating': ratings,
+				'rating_links': ",".join(str(x) for x in rating_links),
+				'names': ",".join(str(x) for x in names),
+				'usernames': ",".join(str(x) for x in usernames),
+				'category_names': ",".join(str(x) for x in categories),
+				'descriptions': ",".join(str(x) for x in descriptions),
+				'wheres': ",".join(str(x) for x in wheres),
+				'starts': ",".join(str(x) for x in starts),
+				'ends': ",".join(str(x) for x in ends),
+				'joineds': ",".join(str(x) for x in joineds),
+				'max_users': ",".join(str(x) for x in max_users),
+				'join_links': ",".join(str(x) for x in join_links),
+				'join_messages': ",".join(str(x) for x in join_messages),
+				'message_links': ",".join(str(x) for x in message_links),
+				'categories': Category.objects.all(),
+				'user': User.objects.get(id=request.session['user_id']),
+				'dashrating': dashRating,
+			}
 		return render(request, 'finder_app/map.html', context)
 	else:
 		context = {
 			'categories': Category.objects.all(),
 			'user': User.objects.get(id=request.session['user_id']),
+			'dashrating': dashRating,		
 		}
 		return render(request, 'finder_app/map.html', context)
 
@@ -130,6 +166,7 @@ def display_user(request):
 def addActivity(request):
 	response = Activity.objects.activityValidation(request.POST)
 	if response['status']:
+		request.session['searchID'] = response['activity'].category.id
 		request.session['lat'] = response['activity'].lat
 		request.session['lng'] = response['activity'].lng
 		return redirect('/main')
@@ -157,4 +194,20 @@ def leaveActivity(request, number):
 def deleteActivity(request, number):
 	if request.session['user_id'] == Activity.objects.get(id=number).created_by.id:
 		Activity.objects.get(id=number).delete()
+	return redirect('/main')
+
+def leaveReview(request, number):
+	if request.method == "POST":
+		del request.session['view_review_id']
+		newReview = Review.objects.create(rating=int(request.POST['rating']),comment=request.POST['comment'],written_by=User.objects.get(id=request.session['user_id']))
+		newReview.written_for.add(User.objects.get(id=number))
+		newReview.save()
+	return redirect('/main')
+
+def viewReview(request, number):
+	request.session['view_review_id'] = number
+	return redirect('/main')
+
+def exitReview(request):
+	del request.session['view_review_id']
 	return redirect('/main')
